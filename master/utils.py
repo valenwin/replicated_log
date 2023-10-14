@@ -34,8 +34,6 @@ def replicate_to_secondaries(message: dict, message_id: str):
 
     message["id"] = message_id
 
-    print(message)
-
     # Iterate over all Secondary URLs
     for secondary_url in secondary_urls:
         try:
@@ -53,8 +51,6 @@ def replicate_to_secondaries(message: dict, message_id: str):
         except requests.exceptions.RequestException:
             # Handle exceptions such as connection errors here
             ack_statuses.append(False)
-
-    print(acknowledgments)
 
     # Check if all Secondaries acknowledged the message
     if all(ack_statuses):
