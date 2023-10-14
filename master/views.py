@@ -4,23 +4,20 @@ from flask import (
     jsonify,
 )
 
-from master.utils import (
-    replicate_to_secondaries,
-    generate_unique_message_id
-)
+from master.utils import replicate_to_secondaries, generate_unique_message_id
 
-master = Blueprint('master', __name__)
+master = Blueprint("master", __name__)
 
 # In-memory list to store messages
 in_memory_list = []
 
 
-@master.route('/')
+@master.route("/")
 def index():
-    return 'This is the main page'
+    return "This is the main page"
 
 
-@master.route('/append', methods=['POST'])
+@master.route("/append", methods=["POST"])
 def append_message():
     """
     {
@@ -29,7 +26,7 @@ def append_message():
     """
     message = request.get_json()
 
-    if 'message' not in message:
+    if "message" not in message:
         return jsonify({"error": "Message not provided"}), 400
 
     in_memory_list.append(message)
@@ -39,6 +36,6 @@ def append_message():
     return replication_result
 
 
-@master.route('/messages', methods=['GET'])
+@master.route("/messages", methods=["GET"])
 def get_messages():
     return jsonify(in_memory_list)

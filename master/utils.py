@@ -5,15 +5,18 @@ import requests
 import logging
 
 # List of URLs for all Secondary servers
-secondary_urls = ["http://localhost:5002/secondary1", "http://localhost:5003/secondary2"]
+secondary_urls = [
+    "http://localhost:5002/secondary1",
+    "http://localhost:5003/secondary2",
+]
 
 logging.basicConfig(
     level=logging.DEBUG,  # Set the desired log level
-    format='%(asctime)s [%(levelname)s] %(message)s',
+    format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler('app_master.log'),  # Log to a file
-        logging.StreamHandler()  # Log to the console
-    ]
+        logging.FileHandler("app_master.log"),  # Log to a file
+        logging.StreamHandler(),  # Log to the console
+    ],
 )
 
 
