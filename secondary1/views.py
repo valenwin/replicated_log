@@ -1,4 +1,5 @@
 import logging
+import time
 
 from flask import (
     Blueprint,
@@ -49,12 +50,11 @@ def replicate_message():
     stored_message = message['message']
 
     # Check if the message is already acknowledged
-    # if stored_message in acknowledged_messages:
-    #     return jsonify({"acknowledged": True}), 200
-
-    # Implement your acknowledgment logic here
-    # For example, you can log the received message and mark it as acknowledged
-    acknowledged_messages.append(message)
+    if stored_message in acknowledged_messages:
+        return jsonify({"acknowledged": True}), 200
+    else:
+        time.sleep(1)
+        acknowledged_messages.append(message)
 
     return jsonify({"acknowledged": True}), 200
 

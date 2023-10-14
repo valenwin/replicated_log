@@ -1,3 +1,6 @@
+import uuid
+import time
+
 import requests
 import logging
 
@@ -14,7 +17,14 @@ logging.basicConfig(
 )
 
 
-def replicate_to_secondaries(message: str):
+def generate_unique_message_id():
+    unique_part = str(uuid.uuid4())
+    timestamp_part = str(int(time.time()))
+    message_id = f"{unique_part}-{timestamp_part}"
+    return message_id
+
+
+def replicate_to_secondaries(message: str, message_id: str):
     # Initialize a list to store ACK statuses from Secondaries
     ack_statuses = []
 
@@ -24,7 +34,10 @@ def replicate_to_secondaries(message: str):
             # Send the message to the Secondary
             response = requests.post(f"{secondary_url}/replicate", json=message)
 
-            # Check if the Secondary acknowledged the message (you can define the acknowledgment logic in your Secondary services)
+            # acknowledgments.append((secondary_url, message_id))
+
+            # Check if the Secondary acknowledged the message
+            # (you can define the acknowledgment logic in your Secondary services)
             if response.status_code == 200 and response.json().get("acknowledged"):
                 ack_statuses.append(True)
             else:
