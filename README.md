@@ -1,4 +1,4 @@
-# replicated_log app
+# replicated_log app v1.0.0
 
 ## Start application locally
 
