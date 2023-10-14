@@ -39,7 +39,6 @@
   ```bash
   curl --location 'http://localhost:5002/secondary1/messages'
 
-
 ### Secondary2 Service (Port 5003)
 
 - **GET Request**
