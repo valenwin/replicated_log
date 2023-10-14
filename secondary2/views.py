@@ -7,7 +7,6 @@ from flask import (
     jsonify,
 )
 
-# Create a Blueprint instance
 secondary2 = Blueprint("secondary2", __name__)
 
 logging.basicConfig(
@@ -19,41 +18,33 @@ logging.basicConfig(
     ],
 )
 
-
-# Define routes and views within the Blueprint
-@secondary2.route("/")
-def index():
-    return "This is the main page"
-
-
-# @secondary2.route('/replicate', methods=['POST'])
-# def replicate_message():
-#     message = request.get_json()
-#
-#     # Implement your acknowledgment logic here
-#     # For example, you can assume successful replication for this example
-#     return jsonify({"acknowledged": True})
-
-
 # Set up a set to keep track of acknowledged messages
 acknowledged_messages = []
+
+
+@secondary2.route("/")
+def index():
+    return "This is the main page for Secondary Server"
 
 
 @secondary2.route("/replicate", methods=["POST"])
 def replicate_message():
     message = request.get_json()
-    #
+
     if "message" not in message:
         return jsonify({"error": "Message not provided"}), 400
 
     # Assuming that successful replication involves storing the message locally
-    stored_message = message["message"]
+    stored_message = message["id"]
+    print(stored_message)
 
     # Check if the message is already acknowledged
     if stored_message in acknowledged_messages:
+        logging.info(f"Message is already added to Secondary 2: {message}")
         return jsonify({"acknowledged": True}), 200
     else:
         time.sleep(1)
+        logging.info(f"Add message to Secondary 2: {message}")
         acknowledged_messages.append(message)
 
     return jsonify({"acknowledged": True}), 200

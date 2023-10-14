@@ -4,7 +4,10 @@ from flask import (
     jsonify,
 )
 
-from master.utils import replicate_to_secondaries, generate_unique_message_id
+from master.utils import (
+    replicate_to_secondaries,
+    generate_unique_message_id,
+)
 
 master = Blueprint("master", __name__)
 
@@ -14,12 +17,13 @@ in_memory_list = []
 
 @master.route("/")
 def index():
-    return "This is the main page"
+    return "This is the main page for Mater Server"
 
 
 @master.route("/append", methods=["POST"])
 def append_message():
     """
+    Request json body example:
     {
         "message": "Hello!"
     }

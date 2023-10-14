@@ -27,9 +27,14 @@ def generate_unique_message_id():
     return message_id
 
 
-def replicate_to_secondaries(message: str, message_id: str):
+def replicate_to_secondaries(message: dict, message_id: str):
     # Initialize a list to store ACK statuses from Secondaries
     ack_statuses = []
+    acknowledgments = {}
+
+    message["id"] = message_id
+
+    print(message)
 
     # Iterate over all Secondary URLs
     for secondary_url in secondary_urls:
@@ -37,10 +42,10 @@ def replicate_to_secondaries(message: str, message_id: str):
             # Send the message to the Secondary
             response = requests.post(f"{secondary_url}/replicate", json=message)
 
-            # acknowledgments.append((secondary_url, message_id))
+            acknowledgments[secondary_url] = message
 
             # Check if the Secondary acknowledged the message
-            # (you can define the acknowledgment logic in your Secondary services)
+            # the acknowledgment logic in Secondary services
             if response.status_code == 200 and response.json().get("acknowledged"):
                 ack_statuses.append(True)
             else:
@@ -48,6 +53,8 @@ def replicate_to_secondaries(message: str, message_id: str):
         except requests.exceptions.RequestException:
             # Handle exceptions such as connection errors here
             ack_statuses.append(False)
+
+    print(acknowledgments)
 
     # Check if all Secondaries acknowledged the message
     if all(ack_statuses):
