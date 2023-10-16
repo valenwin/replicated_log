@@ -4,11 +4,10 @@ import time
 import requests
 import logging
 
+from decouple import config
+
 # List of URLs for all Secondary servers
-secondary_urls = [
-    "http://localhost:5002/secondary1",
-    "http://localhost:5003/secondary2",
-]
+secondary_urls = config("SECONDARY_URLS").split(",")
 
 logging.basicConfig(
     level=logging.DEBUG,  # Set the desired log level
