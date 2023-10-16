@@ -1,0 +1,33 @@
+version: '3'
+services:
+  master:
+    build:
+      context: master
+    ports:
+      - "5001:5000"
+    environment:
+      - SECONDARY_URLS=http://secondary1:5000,http://secondary2:5000
+    depends_on:
+      - secondary1
+      - secondary2
+    networks:
+      - my-network
+
+  secondary1:
+    build:
+      context: secondary1
+    ports:
+      - "5002:5000"
+    networks:
+      - my-network
+
+  secondary2:
+    build:
+      context: secondary2
+    ports:
+      - "5003:5000"
+    networks:
+      - my-network
+
+networks:
+  my-network:

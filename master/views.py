@@ -4,7 +4,8 @@ from flask import (
     jsonify,
 )
 
-from master.utils import (
+from utils import (
+    replicate_to_secondaries_async,
     replicate_to_secondaries,
     generate_unique_message_id,
 )
@@ -21,7 +22,7 @@ def index():
 
 
 @master.route("/append", methods=["POST"])
-def append_message():
+async def append_message():
     """
     Request json body example:
     {
@@ -36,7 +37,7 @@ def append_message():
     in_memory_list.append(message)
 
     message_id = generate_unique_message_id()
-    replication_result = replicate_to_secondaries(message, message_id)
+    replication_result = await replicate_to_secondaries(message, message_id)
     return replication_result
 
 

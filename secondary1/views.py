@@ -1,5 +1,5 @@
+import asyncio
 import logging
-import time
 
 from flask import (
     Blueprint,
@@ -28,7 +28,7 @@ def index():
 
 
 @secondary1.route("/replicate", methods=["POST"])
-def replicate_message():
+async def replicate_message():
     message = request.get_json()
 
     if "message" not in message:
@@ -42,7 +42,7 @@ def replicate_message():
         logging.info(f"Message is already added to Secondary 1: {message}")
         return jsonify({"acknowledged": True}), 200
     else:
-        time.sleep(1)
+        await asyncio.sleep(1)
         logging.info(f"Add message to Secondary 1: {message}")
         acknowledged_messages.append(message)
 
