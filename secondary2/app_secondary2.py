@@ -14,4 +14,4 @@ def app_secondary2_route():
 
 
 if __name__ == "__main__":
-    app_secondary2.run(debug=True, port=5003)
+    app_secondary2.run(debug=True, host="0.0.0.0")

@@ -9,14 +9,14 @@ from flask import (
 
 secondary1 = Blueprint("secondary1", __name__)
 
-logging.basicConfig(
-    level=logging.DEBUG,  # Set the desired log level
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.FileHandler("app_secondary.log"),  # Log to a file
-        logging.StreamHandler(),  # Log to the console
-    ],
-)
+# logging.basicConfig(
+#     level=logging.DEBUG,  # Set the desired log level
+#     format="%(asctime)s [%(levelname)s] %(message)s",
+#     handlers=[
+#         logging.FileHandler("app_secondary.log"),  # Log to a file
+#         logging.StreamHandler(),  # Log to the console
+#     ],
+# )
 
 # Set up a set to keep track of acknowledged messages
 acknowledged_messages = []

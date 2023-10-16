@@ -13,14 +13,14 @@ secondary_urls = config("SECONDARY_URLS").split(",")
 #     "http://localhost:5003/secondary2",
 # ]
 
-logging.basicConfig(
-    level=logging.DEBUG,  # Set the desired log level
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.FileHandler("app_master.log"),  # Log to a file
-        logging.StreamHandler(),  # Log to the console
-    ],
-)
+# logging.basicConfig(
+#     level=logging.DEBUG,  # Set the desired log level
+#     format="%(asctime)s [%(levelname)s] %(message)s",
+#     handlers=[
+#         logging.FileHandler("app_master.log"),  # Log to a file
+#         logging.StreamHandler(),  # Log to the console
+#     ],
+# )
 
 
 def generate_unique_message_id():

@@ -11,7 +11,9 @@ COPY . /app/secondary2
 RUN pip install -r requirements.txt
 
 # Expose ports used by the Flask apps
-EXPOSE 5003
+EXPOSE 5000
 
 # Run the Python script that starts the Flask apps
-CMD ["python", "app_secondary2.py"]
+ENTRYPOINT ["python"]
+
+CMD ["app_secondary2.py"]

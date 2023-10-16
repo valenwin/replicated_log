@@ -14,4 +14,4 @@ def app_master_route():
 
 
 if __name__ == "__main__":
-    app_master.run(debug=True, port=5001)
+    app_master.run(debug=True, host="0.0.0.0")

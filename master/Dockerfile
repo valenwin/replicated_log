@@ -11,7 +11,9 @@ COPY . /app/master
 RUN pip install -r requirements.txt
 
 # Expose ports used by the Flask apps
-EXPOSE 5001
+EXPOSE 5000
 
 # Run the Python script that starts the Flask apps
-CMD ["python", "app_master.py"]
+ENTRYPOINT ["python"]
+
+CMD ["app_master.py"]

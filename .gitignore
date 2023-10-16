@@ -91,3 +91,6 @@ ENV/
 
 .idea
 /venv3.10/
+/secondary2/.pytest_cache/
+/secondary1/.pytest_cache/
+/master/.pytest_cache/
