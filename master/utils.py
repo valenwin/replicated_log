@@ -7,20 +7,18 @@ import logging
 from decouple import config
 
 # List of URLs for all Secondary servers
+# example from .env file
+# http://secondary1:5002/secondary1,http://secondary2:5003/secondary2
 secondary_urls = config("SECONDARY_URLS").split(",")
-# secondary_urls = [
-#     "http://localhost:5002/secondary1",
-#     "http://localhost:5003/secondary2",
-# ]
 
-# logging.basicConfig(
-#     level=logging.DEBUG,  # Set the desired log level
-#     format="%(asctime)s [%(levelname)s] %(message)s",
-#     handlers=[
-#         logging.FileHandler("app_master.log"),  # Log to a file
-#         logging.StreamHandler(),  # Log to the console
-#     ],
-# )
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler("app_master.log"),
+        logging.StreamHandler(),
+    ],
+)
 
 
 def generate_unique_message_id():

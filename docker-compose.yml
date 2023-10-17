@@ -6,7 +6,7 @@ services:
     ports:
       - "5001:5001"
     environment:
-      - SECONDARY_URLS=http://secondary1:5002//secondary1,http://secondary2:5003/secondary2
+      - SECONDARY_URLS=${SECONDARY_URLS}
     depends_on:
       - secondary1
       - secondary2
