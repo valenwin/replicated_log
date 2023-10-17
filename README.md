@@ -2,15 +2,15 @@
 
 ## Start application locally
 
-- **Build Docker image**
+- **Build Docker images**
 
   ```bash
-  docker build -t replicated-log-app .
+  docker-compose build
 
-- **Run Docker container**
+- **Run Docker containers**
 
   ```bash
-  docker run -p 5001:5001 -p 5002:5002 -p 5003:5003 replicated-log-app
+  docker-compose up -d
 
 ## Usage
 
