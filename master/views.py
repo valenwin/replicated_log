@@ -5,7 +5,6 @@ from flask import (
 )
 
 from utils import (
-    replicate_to_secondaries_async,
     replicate_to_secondaries,
     generate_unique_message_id,
 )
