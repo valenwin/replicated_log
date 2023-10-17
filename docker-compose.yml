@@ -4,9 +4,9 @@ services:
     build:
       context: master
     ports:
-      - "5001:5000"
+      - "5001:5001"
     environment:
-      - SECONDARY_URLS=http://secondary1:5000,http://secondary2:5000
+      - SECONDARY_URLS=http://secondary1:5002//secondary1,http://secondary2:5003/secondary2
     depends_on:
       - secondary1
       - secondary2
@@ -17,7 +17,7 @@ services:
     build:
       context: secondary1
     ports:
-      - "5002:5000"
+      - "5002:5002"
     networks:
       - my-network
 
@@ -25,7 +25,7 @@ services:
     build:
       context: secondary2
     ports:
-      - "5003:5000"
+      - "5003:5003"
     networks:
       - my-network
 
