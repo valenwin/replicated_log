@@ -2,7 +2,7 @@ import json
 import pytest
 import requests_mock
 
-from app import app_master
+from master.app_master import app_master
 
 
 @pytest.fixture
@@ -52,12 +52,12 @@ def test_append_message_route(client):
 
     with requests_mock.Mocker() as m:
         m.post(
-            "http://localhost:5002/secondary1/replicate",
+            "http://secondary1:5002/secondary1/replicate",
             json={"acknowledged": True},
             status_code=200,
         )
         m.post(
-            "http://localhost:5003/secondary2/replicate",
+            "http://secondary2:5003/secondary2/replicate",
             json={"acknowledged": True},
             status_code=200,
         )
@@ -72,12 +72,12 @@ def test_append_message_route_failed_replication_secondary1(client):
 
     with requests_mock.Mocker() as m:
         m.post(
-            "http://localhost:5002/secondary1/replicate",
+            "http://secondary1:5002/secondary1/replicate",
             json={"acknowledged": False},
             status_code=200,
         )
         m.post(
-            "http://localhost:5003/secondary2/replicate",
+            "http://secondary2:5003/secondary2/replicate",
             json={"acknowledged": True},
             status_code=200,
         )
@@ -92,12 +92,12 @@ def test_append_message_route_failed_replication_secondary2(client):
 
     with requests_mock.Mocker() as m:
         m.post(
-            "http://localhost:5002/secondary1/replicate",
+            "http://secondary1:5002/secondary1/replicate",
             json={"acknowledged": True},
             status_code=200,
         )
         m.post(
-            "http://localhost:5003/secondary2/replicate",
+            "http://secondary2:5003/secondary2/replicate",
             json={"acknowledged": False},
             status_code=200,
         )

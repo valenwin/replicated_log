@@ -1,10 +1,12 @@
+import pytest
 import requests
 from unittest.mock import patch, MagicMock
 
 from master.utils import replicate_to_secondaries
 
 
-def test_successful_replication():
+@pytest.mark.asyncio
+async def test_successful_replication():
     # Mock the behavior of requests.post for a successful replication
     with patch("requests.post") as mock_post:
         mock_response = MagicMock()
@@ -15,13 +17,14 @@ def test_successful_replication():
         message = {"data": "example data"}
         message_id = "example_message_id"
 
-        result = replicate_to_secondaries(message, message_id)
+        result = await replicate_to_secondaries(message, message_id)
 
         assert result == "Message replicated on all Secondaries"
         mock_post.assert_called()
 
 
-def test_failed_replication():
+@pytest.mark.asyncio
+async def test_failed_replication():
     # Mock the behavior of requests.post for a failed replication
     with patch("requests.post") as mock_post:
         mock_response = MagicMock()
@@ -32,18 +35,19 @@ def test_failed_replication():
         message = {"data": "example data"}
         message_id = "example_message_id"
 
-        result = replicate_to_secondaries(message, message_id)
+        result = await replicate_to_secondaries(message, message_id)
 
         assert result == "Failed to replicate message on all Secondaries"
         mock_post.assert_called()
 
 
-def test_request_exception_handling():
+@pytest.mark.asyncio
+async def test_request_exception_handling():
     # Mock requests.post to raise a RequestException
     with patch("requests.post", side_effect=requests.exceptions.RequestException):
         message = {"data": "example data"}
         message_id = "example_message_id"
 
-        result = replicate_to_secondaries(message, message_id)
+        result = await replicate_to_secondaries(message, message_id)
 
         assert result == "Failed to replicate message on all Secondaries"

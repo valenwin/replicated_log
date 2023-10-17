@@ -1,7 +1,7 @@
 import pytest
 import json
 
-from app import app_secondary1
+from secondary1.app_secondary1 import app_secondary1
 
 
 @pytest.fixture
