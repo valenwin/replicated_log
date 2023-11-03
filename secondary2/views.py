@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from flask import (
@@ -32,6 +33,7 @@ def index():
 
 @secondary2.route("/replicate", methods=["POST"])
 async def replicate_message():
+    await asyncio.sleep(1)
     message = request.get_json()
 
     if "message" not in message or "timestamp" not in message:
