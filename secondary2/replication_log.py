@@ -9,7 +9,7 @@ class ReplicationLog:
             return False, "Ordering issue detected"
 
         if any(
-                msg["message"]["id"] == message_id for msg in self.acknowledged_messages
+            msg["message"]["id"] == message_id for msg in self.acknowledged_messages
         ):
             # Message already acknowledged
             return True, None
@@ -23,7 +23,4 @@ class ReplicationLog:
 
     def get_messages(self):
         # Returns a list of all messages sorted by timestamp
-        return sorted(
-            self.acknowledged_messages,
-            key=lambda x: x['timestamp']
-        )
+        return sorted(self.acknowledged_messages, key=lambda x: x["timestamp"])
