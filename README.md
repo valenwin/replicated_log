@@ -1,6 +1,6 @@
 # replicated_log app v1.0.0
 
-## Start application locally
+## Start application on your local machine
 
 - **Build Docker images**
 
