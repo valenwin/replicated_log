@@ -54,12 +54,12 @@ async def replicate_to_secondaries(message: dict, message_id: str, write_concern
         logging.info(
             f"Message {message_id} replicated to {acks_received} secondaries, meeting write concern of {write_concern}."
         )
-        return "Message replicated according to write concern"
+        return "Message replicated according to write concern."
     else:
         logging.warning(
             f"Message {message_id} did not meet write concern. Only {acks_received} secondaries acknowledged."
         )
-        return "Write concern not met; message may not be fully replicated"
+        return "Write concern not met; message may not be fully replicated."
 
 
 async def replicate_to_secondary(secondary_url: str, message: dict):
@@ -72,6 +72,7 @@ async def replicate_to_secondary(secondary_url: str, message: dict):
         if response.status_code == 200 and response.json().get("acknowledged"):
             return True, secondary_url
         else:
+            print(response.status_code, response.json().get("acknowledged"))
             return False, secondary_url
     except requests.exceptions.RequestException as e:
         logging.error(f"Error replicating to {secondary_url}: {e}")

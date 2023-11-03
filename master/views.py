@@ -1,3 +1,5 @@
+import time
+
 from flask import (
     Blueprint,
     request,
@@ -45,7 +47,11 @@ async def append_message():
         # If it exists, you might want to update it, ignore it, or throw an error, based on your use case
         return jsonify({"error": "Duplicate message"}), 409
 
-    message_with_id = {"id": message_id, "message": message_content}
+    message_with_id = {
+        "id": message_id,
+        "message": message_content,
+        "timestamp": int(time.time()),
+    }
     in_memory_list.append(message_with_id)
 
     # Asynchronously replicate the message to the secondary servers
