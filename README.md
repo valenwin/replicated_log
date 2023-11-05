@@ -1,4 +1,4 @@
-# replicated_log app v1.0.0
+# replicated_log app v2.0.0
 
 ## Start application locally
 
@@ -26,9 +26,12 @@
 - **POST Request**
 
   ```bash
-  curl --location 'http://localhost:5001/master/append' \
-       --header 'Content-Type: application/json' \
-       --data '{"message": "Hello."}'
+  curl --location 'http://127.0.0.1:5001/master/append' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "message": "Hello.",
+    "write_concern": 2
+  }'
 
 ### Secondary1 Service (Port 5002)
 

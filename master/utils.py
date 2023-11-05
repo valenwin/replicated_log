@@ -28,36 +28,52 @@ def generate_unique_message_id():
     return message_id
 
 
-async def replicate_to_secondaries(message: dict, message_id: str):
-    # Initialize a list to store ACK statuses from Secondaries
-    ack_statuses = []
-    acknowledgments = {}
+async def replicate_to_secondaries(message: dict, message_id: str, write_concern: int):
+    # Store ACKs received from Secondaries
+    acks_received = 0
 
     message["id"] = message_id
 
-    # Iterate over all Secondary URLs
+    # Set up tasks for all secondaries
+    secondary_tasks = []
     for secondary_url in secondary_urls:
-        try:
-            # Send the message to the Secondary
-            response = await asyncio.to_thread(
-                requests.post, f"{secondary_url}/replicate", json=message
-            )
-            acknowledgments[secondary_url] = message
+        task = asyncio.create_task(replicate_to_secondary(secondary_url, message))
+        secondary_tasks.append(task)
 
-            # Check if the Secondary acknowledged the message
-            # the acknowledgment logic in Secondary services
-            if response.status_code == 200 and response.json().get("acknowledged"):
-                ack_statuses.append(True)
-            else:
-                ack_statuses.append(False)
-        except requests.exceptions.RequestException:
-            # Handle exceptions such as connection errors here
-            ack_statuses.append(False)
+    # Await the replication tasks and check for acknowledgements
+    for future in asyncio.as_completed(secondary_tasks):
+        secondary_ack, _ = await future
+        if secondary_ack:
+            acks_received += 1
+            # If we've met the write concern, we can respond successfully
+            if acks_received >= write_concern:
+                break
 
-    # Check if all Secondaries acknowledged the message
-    if all(ack_statuses):
-        logging.info("Message replicated on all Secondaries")
-        return "Message replicated on all Secondaries"
+    # Check if write concern level is met
+    if acks_received >= write_concern:
+        logging.info(
+            f"Message {message_id} replicated to {acks_received} secondaries, meeting write concern of {write_concern}."
+        )
+        return "Message replicated according to write concern."
     else:
-        logging.info("Failed to replicate message on all Secondaries")
-        return "Failed to replicate message on all Secondaries"
+        logging.warning(
+            f"Message {message_id} did not meet write concern. Only {acks_received} secondaries acknowledged."
+        )
+        return "Write concern not met; message may not be fully replicated."
+
+
+async def replicate_to_secondary(secondary_url: str, message: dict):
+    try:
+        response = await asyncio.to_thread(
+            requests.post, f"{secondary_url}/replicate", json=message
+        )
+
+        # Consider it acknowledged if the secondary responded with 200
+        if response.status_code == 200 and response.json().get("acknowledged"):
+            return True, secondary_url
+        else:
+            print(response.status_code, response.json().get("acknowledged"))
+            return False, secondary_url
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error replicating to {secondary_url}: {e}")
+        return False, secondary_url
