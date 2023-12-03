@@ -8,7 +8,9 @@ class WriteConcernManager:
 
     def wait_for_write_concern(self, message_id, required_acks):
         with self.lock:
-            condition = self.messages_conditions.setdefault(message_id, threading.Condition(self.lock))
+            condition = self.messages_conditions.setdefault(
+                message_id, threading.Condition(self.lock)
+            )
             condition.required_acks = required_acks
             condition.acks_received = 0
 

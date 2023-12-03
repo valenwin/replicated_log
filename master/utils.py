@@ -87,11 +87,13 @@ async def replicate_to_secondary(secondary_url: str, message: dict):
             logging.error(f"Transient error replicating to {secondary_url}: {e}")
         except (HTTPError, TooManyRedirects, RequestException) as e:
             # These may indicate more persistent errors.
-            logging.error(f"Persistent error replicating to {secondary_url}, will not retry: {e}")
+            logging.error(
+                f"Persistent error replicating to {secondary_url}, will not retry: {e}"
+            )
             break  # Do not retry these errors
 
         # Exponential backoff strategy
-        delay = BASE_DELAY * (2 ** retries) + random.uniform(0, 1)
+        delay = BASE_DELAY * (2**retries) + random.uniform(0, 1)
         logging.info(f"Retrying in {delay:.2f} seconds...")
         await asyncio.sleep(delay)
         retries += 1

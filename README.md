@@ -29,8 +29,9 @@
   curl --location 'http://127.0.0.1:5001/master/append' \
   --header 'Content-Type: application/json' \
   --data '{
-    "message": "Hello.",
-    "write_concern": 2
+    "message": "Hello. 2",
+    "write_concern": 2,
+    "sequence_number": 1
   }'
 
 ### Secondary1 Service (Port 5002)

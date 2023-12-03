@@ -1,5 +1,5 @@
 import logging
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, make_response
 from utils import SecondaryServer
 
 secondary2 = Blueprint("secondary2", __name__)
@@ -39,7 +39,9 @@ def replicate_message():
         return jsonify({"acknowledged": True}), 200
     else:
         # An error occurred while processing the message.
-        logging.error(f"Failed to process message {message['id']} by Secondary 2: {result}")
+        logging.error(
+            f"Failed to process message {message['id']} by Secondary 2: {result}"
+        )
         return jsonify({"error": result}), 500
 
 
@@ -48,3 +50,9 @@ def get_messages():
     # Return the ordered list of messages
     messages = secondary_server.get_ordered_messages()
     return jsonify(messages)
+
+
+@secondary2.route("/health", methods=["GET"])
+def health_check():
+    response = make_response("", 200)
+    return response

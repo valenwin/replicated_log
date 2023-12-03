@@ -1,14 +1,18 @@
+import asyncio
 import time
 
 import requests
 from flask import Blueprint, request, jsonify
 from decouple import config
-from master.manager import WriteConcernManager
+from manager import WriteConcernManager
 from apscheduler.schedulers.background import BackgroundScheduler
 from utils import (
     replicate_to_secondaries,
     generate_unique_message_id,
 )
+from concurrent.futures import ThreadPoolExecutor
+
+executor = ThreadPoolExecutor()
 
 master = Blueprint("master", __name__)
 write_concern_manager = WriteConcernManager()
@@ -23,7 +27,9 @@ in_memory_list = []
 def send_heartbeat(secondary_url):
     try:
         response = requests.get(f"{secondary_url}/health")
-        secondary_statuses[secondary_url] = "Healthy" if response.status_code == 200 else "Suspected"
+        secondary_statuses[secondary_url] = (
+            "Healthy" if response.status_code == 200 else "Suspected"
+        )
     except requests.exceptions.RequestException:
         secondary_statuses[secondary_url] = "Unhealthy"
 
@@ -35,7 +41,7 @@ def check_quorum():
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(
-    lambda: [send_heartbeat(url) for url in secondary_urls], 'interval', seconds=5
+    lambda: [send_heartbeat(url) for url in secondary_urls], "interval", seconds=5
 )
 scheduler.start()
 
@@ -53,6 +59,7 @@ def append_message():
     req_data = request.get_json()
     message_content = req_data.get("message")
     write_concern = req_data.get("write_concern", 1)
+    sequence_number = req_data.get("sequence_number", 0)
 
     if not message_content:
         return jsonify({"error": "Message content is required."}), 400
@@ -60,26 +67,33 @@ def append_message():
     message_id = generate_unique_message_id()
 
     # Check for duplicate message IDs
-    if any(msg['id'] == message_id for msg in in_memory_list):
+    if any(msg["id"] == message_id for msg in in_memory_list):
         return jsonify({"error": "Duplicate message ID."}), 409
 
     # Create the message with a unique ID
     message_with_id = {
         "id": message_id,
+        "sequence_number": sequence_number,
         "message": message_content,
         "timestamp": int(time.time()),
     }
     in_memory_list.append(message_with_id)
 
     # Replicate the message to secondary servers
-    # Note: Modify replicate_to_secondaries to handle the write concern and replication result.
-    replicate_to_secondaries(message_with_id, message_id, write_concern)
+    # Schedule the coroutine to run as a background task
+    executor.submit(
+        asyncio.run,
+        replicate_to_secondaries(message_with_id, message_id, write_concern),
+    )
 
     # Wait for the write concern to be satisfied
     try:
         write_concern_manager.wait_for_write_concern(message_id, write_concern)
     except TimeoutError:  # You should define a timeout mechanism in WriteConcernManager
-        return jsonify({"error": "Write concern not met within the expected time."}), 408
+        return (
+            jsonify({"error": "Write concern not met within the expected time."}),
+            408,
+        )
 
     return jsonify({"status": "Message appended with required write concern"}), 201
 
@@ -89,7 +103,7 @@ def get_messages():
     return jsonify(in_memory_list)
 
 
-@master.route('/health', methods=['GET'])
+@master.route("/health", methods=["GET"])
 def health_check():
     # Return the master's view of the health of the system
     return jsonify(secondary_statuses)
