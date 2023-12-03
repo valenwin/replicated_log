@@ -73,29 +73,29 @@ async def replicate_to_secondary(secondary_url: str, message: dict):
     retries = 0
     while retries < MAX_RETRIES:
         try:
+            logging.debug(
+                f"Sending message {message['id']} to {secondary_url}. Attempt: {retries + 1}"
+            )
             response = await asyncio.to_thread(
                 requests.post, f"{secondary_url}/replicate", json=message
             )
-            # Will raise HTTPError for bad HTTP status codes
             response.raise_for_status()
-
-            # Consider it acknowledged if the secondary responded with 200
-            if response.json().get("acknowledged"):
-                return True, secondary_url
-        except (ConnectionError, Timeout) as e:
-            # These are typically transient errors that justify a retry
-            logging.error(f"Transient error replicating to {secondary_url}: {e}")
-        except (HTTPError, TooManyRedirects, RequestException) as e:
-            # These may indicate more persistent errors.
-            logging.error(
-                f"Persistent error replicating to {secondary_url}, will not retry: {e}"
+            logging.debug(
+                f"Successfully sent message {message['id']} to {secondary_url}"
             )
-            break  # Do not retry these errors
-
-        # Exponential backoff strategy
-        delay = BASE_DELAY * (2**retries) + random.uniform(0, 1)
-        logging.info(f"Retrying in {delay:.2f} seconds...")
-        await asyncio.sleep(delay)
-        retries += 1
+            return True, secondary_url
+        except RequestException as e:
+            logging.warning(
+                f"Failed to send message {message['id']} to {secondary_url}: {e}"
+            )
+            if retries >= MAX_RETRIES - 1:
+                logging.error(
+                    f"Max retries exceeded for message {message['id']} to {secondary_url}"
+                )
+                break
+            delay = BASE_DELAY * (2**retries) + random.uniform(0, 1)
+            logging.info(f"Retrying in {delay:.2f} seconds...")
+            await asyncio.sleep(delay)
+            retries += 1
 
     return False, secondary_url

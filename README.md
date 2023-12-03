@@ -22,7 +22,7 @@
 
   ```bash
   curl --location 'http://localhost:5001/master/messages'
-  
+
 - **POST Request**
 
   ```bash
@@ -32,6 +32,18 @@
     "message": "Hello. 2",
     "write_concern": 2,
     "sequence_number": 1
+  }'
+
+
+- **POST Request**
+
+  ```bash
+  curl --location 'http://127.0.0.1:5001/master/append' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "message": "Hello. rereeewe",
+    "write_concern": 3,
+    "sequence_number": 2
   }'
 
 ### Secondary1 Service (Port 5002)
