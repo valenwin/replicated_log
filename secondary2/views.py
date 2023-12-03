@@ -1,17 +1,9 @@
-import asyncio
 import logging
-
-from flask import (
-    Blueprint,
-    request,
-    jsonify,
-)
-
-from replication_log import ReplicationLog
+from flask import Blueprint, request, jsonify, make_response
+from utils import SecondaryServer
 
 secondary2 = Blueprint("secondary2", __name__)
-# Create an instance of the log
-replication_log = ReplicationLog()
+secondary_server = SecondaryServer()
 
 logging.basicConfig(
     level=logging.DEBUG,  # Set the desired log level
@@ -22,9 +14,6 @@ logging.basicConfig(
     ],
 )
 
-# Use a dictionary to keep track of acknowledged messages with their timestamps
-acknowledged_messages = {}
-
 
 @secondary2.route("/")
 def index():
@@ -32,33 +21,38 @@ def index():
 
 
 @secondary2.route("/replicate", methods=["POST"])
-async def replicate_message():
-    await asyncio.sleep(1)
+def replicate_message():
     message = request.get_json()
 
-    if "message" not in message or "timestamp" not in message:
-        return jsonify({"error": "Message or timestamp not provided"}), 400
+    if "sequence_number" not in message or "id" not in message:
+        return jsonify({"error": "Missing sequence number or message ID"}), 400
 
-    message_id = message["id"]
-    message_timestamp = message["timestamp"]
+    # Process the message using the SecondaryServer instance
+    result = secondary_server.process_message(message)
 
-    acknowledged, error = replication_log.acknowledge_message(
-        message_id, message_timestamp, message
-    )
-
-    if not acknowledged:
-        if error:
-            logging.error(f"Error acknowledging message {message_id}: {error}")
-            return jsonify({"error": error}), 500
-        else:
-            logging.info(f"Message {message_id} is already added to Secondary 2.")
-            return jsonify({"acknowledged": True}), 200
-
-    logging.info(f"Adding message {message_id} to Secondary 2.")
-    return jsonify({"acknowledged": True}), 200
+    if result == "Message processed":
+        logging.info(f"Message {message['id']} processed by Secondary 2.")
+        return jsonify({"acknowledged": True}), 200
+    elif result == "Message already processed":
+        # The message was already processed, acknowledge to prevent resending.
+        logging.info(f"Message {message['id']} already processed by Secondary 2.")
+        return jsonify({"acknowledged": True}), 200
+    else:
+        # An error occurred while processing the message.
+        logging.error(
+            f"Failed to process message {message['id']} by Secondary 2: {result}"
+        )
+        return jsonify({"error": result}), 500
 
 
 @secondary2.route("/messages", methods=["GET"])
 def get_messages():
-    messages = replication_log.get_messages()
+    # Return the ordered list of messages
+    messages = secondary_server.get_ordered_messages()
     return jsonify(messages)
+
+
+@secondary2.route("/health", methods=["GET"])
+def health_check():
+    response = make_response("", 200)
+    return response

@@ -1,3 +1,4 @@
+import random
 import uuid
 import time
 import asyncio
@@ -5,6 +6,12 @@ import requests
 import logging
 
 from decouple import config
+from requests.exceptions import RequestException
+from requests.exceptions import ConnectionError, HTTPError, Timeout, TooManyRedirects
+
+# Configuration for retries
+MAX_RETRIES = 5
+BASE_DELAY = 0.1  # seconds
 
 # List of URLs for all Secondary servers
 # example from .env file
@@ -63,17 +70,32 @@ async def replicate_to_secondaries(message: dict, message_id: str, write_concern
 
 
 async def replicate_to_secondary(secondary_url: str, message: dict):
-    try:
-        response = await asyncio.to_thread(
-            requests.post, f"{secondary_url}/replicate", json=message
-        )
-
-        # Consider it acknowledged if the secondary responded with 200
-        if response.status_code == 200 and response.json().get("acknowledged"):
+    retries = 0
+    while retries < MAX_RETRIES:
+        try:
+            logging.debug(
+                f"Sending message {message['id']} to {secondary_url}. Attempt: {retries + 1}"
+            )
+            response = await asyncio.to_thread(
+                requests.post, f"{secondary_url}/replicate", json=message
+            )
+            response.raise_for_status()
+            logging.debug(
+                f"Successfully sent message {message['id']} to {secondary_url}"
+            )
             return True, secondary_url
-        else:
-            print(response.status_code, response.json().get("acknowledged"))
-            return False, secondary_url
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Error replicating to {secondary_url}: {e}")
-        return False, secondary_url
+        except RequestException as e:
+            logging.warning(
+                f"Failed to send message {message['id']} to {secondary_url}: {e}"
+            )
+            if retries >= MAX_RETRIES - 1:
+                logging.error(
+                    f"Max retries exceeded for message {message['id']} to {secondary_url}"
+                )
+                break
+            delay = BASE_DELAY * (2**retries) + random.uniform(0, 1)
+            logging.info(f"Retrying in {delay:.2f} seconds...")
+            await asyncio.sleep(delay)
+            retries += 1
+
+    return False, secondary_url
