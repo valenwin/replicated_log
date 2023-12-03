@@ -55,6 +55,13 @@
   ```bash
   curl --location 'http://localhost:5002/secondary1/messages'
 
+- **GET Request**
+
+  Secondary1 Service health check:
+
+  ```bash
+  curl --location 'http://localhost:5002/secondary1/health'
+
 ### Secondary2 Service (Port 5003)
 
 - **GET Request**
@@ -63,3 +70,11 @@
 
   ```bash
   curl --location 'http://localhost:5003/secondary2/messages'
+
+
+- **GET Request**
+
+  Secondary2 Service health check:
+
+  ```bash
+  curl --location 'http://localhost:5003/secondary2/health'
